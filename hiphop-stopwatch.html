@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>힙합 스탑워치</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f1ebdf;
+    --ink: #111;
+    --red: #d71920;
+    --gold: #f2c230;
+    --night: #0c0c0c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--night);
+    color: var(--ink);
+    font-family: "Oswald", "Malgun Gothic", Impact, sans-serif;
+    overflow-x: hidden;
+  }
+  .page {
+    min-height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .page.active { display: flex; }
+
+  /* ───────── 1페이지: 잡지 표지 ───────── */
+  #cover { background: radial-gradient(circle at 50% 30%, #2a2a2a, #050505 70%); }
+  .mag {
+    position: relative;
+    width: min(100%, 460px);
+    aspect-ratio: 8.5 / 11;
+    background: var(--paper);
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 0 1px #000;
+    animation: drop .7s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes drop { from { transform: translateY(-40px) rotate(-3deg); opacity: 0; } }
+  .mag .photo {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: contrast(1.1) saturate(1.05);
+  }
+  .masthead {
+    position: absolute; top: 2%; left: 0; right: 0;
+    text-align: center;
+    font-family: "Anton", Impact, sans-serif;
+    font-size: clamp(64px, 24vw, 118px);
+    line-height: .9;
+    color: var(--red);
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 0 #000, -1px -1px 0 #fff;
+    z-index: 1;
+  }
+  .tagline {
+    position: absolute; top: 1%; left: 0; right: 0;
+    text-align: center;
+    font-size: 9px; letter-spacing: 2px; font-weight: 600;
+    color: #000; z-index: 2;
+  }
+  .issue {
+    position: absolute; top: 24%; right: 4%;
+    font-family: "Bebas Neue", Impact, sans-serif;
+    font-size: 14px; text-align: right; line-height: 1.1;
+    color: #fff; text-shadow: 1px 1px 0 #000; z-index: 2;
+  }
+  .lines {
+    position: absolute; left: 4%; top: 30%;
+    width: 42%; z-index: 2;
+    font-family: "Bebas Neue", Impact, sans-serif;
+    color: #fff; text-shadow: 2px 2px 0 #000;
+  }
+  .lines p { margin: 0 0 12px; font-size: 22px; line-height: .95; }
+  .lines small { display: block; font-family: "Oswald", sans-serif; font-size: 10px; letter-spacing: .5px; color: var(--gold); }
+  .headline {
+    position: absolute; left: 0; right: 0; bottom: 11%;
+    text-align: center; z-index: 2;
+    font-family: "Anton", Impact, sans-serif;
+    color: #fff;
+    text-shadow: 3px 3px 0 var(--red), 5px 5px 0 #000;
+  }
+  .headline .kicker { font-size: 16px; letter-spacing: 6px; color: var(--gold); text-shadow: 1px 1px 0 #000; }
+  .headline .big { font-size: clamp(34px, 11vw, 54px); line-height: .95; }
+  .barcode {
+    position: absolute; left: 4%; bottom: 2.5%;
+    background: #fff; padding: 4px 6px 2px; z-index: 2;
+    font-size: 8px; text-align: center; line-height: 1.1;
+  }
+  .barcode div {
+    width: 64px; height: 26px;
+    background: repeating-linear-gradient(90deg, #000 0 2px, #fff 2px 3px, #000 3px 4px, #fff 4px 6px, #000 6px 9px, #fff 9px 10px);
+  }
+  #startBtn {
+    position: absolute; right: 4%; bottom: 2.5%; z-index: 3;
+    font-family: "Anton", Impact, sans-serif;
+    font-size: 22px; letter-spacing: 2px;
+    padding: 10px 22px;
+    color: #000; background: var(--gold);
+    border: 3px solid #000; border-radius: 50px;
+    box-shadow: 4px 4px 0 #000;
+    cursor: pointer;
+    transform: rotate(-4deg);
+    animation: wobble 1.6s ease-in-out infinite;
+  }
+  #startBtn:hover { background: #fff; }
+  @keyframes wobble { 50% { transform: rotate(3deg) scale(1.06); } }
+  .bgm-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 10;
+    font-family: "Bebas Neue", Impact, sans-serif; font-size: 16px; letter-spacing: 1px;
+    background: rgba(0,0,0,.6); color: #fff;
+    border: 1px solid #555; border-radius: 20px; padding: 6px 14px; cursor: pointer;
+  }
+  .bgm-toggle.on { border-color: var(--gold); color: var(--gold); }
+
+  /* ───────── 2페이지: 스탑워치 ───────── */
+  #watch {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(215,25,32,.35), transparent 60%),
+      var(--night);
+    color: #fff;
+  }
+  .studio { width: min(100%, 420px); text-align: center; }
+  .back {
+    background: none; border: none; color: #888; cursor: pointer;
+    font-family: "Bebas Neue", sans-serif; font-size: 16px; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .back:hover { color: #fff; }
+  .stage {
+    position: relative;
+    width: 100%; aspect-ratio: 1;
+    border: 4px solid #fff;
+    box-shadow: 8px 8px 0 var(--red);
+    background: #1a1a1a;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .stage .photo, .stage svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .stage .rapper { transform-origin: 50% 100%; }
+  .stage.rapping .rapper { animation: bob .652s ease-in-out infinite; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-2.5%) rotate(-1.5deg); }
+    50% { transform: translateY(1%) rotate(0); }
+    75% { transform: translateY(-2.5%) rotate(1.5deg); }
+  }
+  .stage .restart-tip {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 8px; font-size: 12px; letter-spacing: 1px;
+    background: linear-gradient(transparent, rgba(0,0,0,.85));
+    opacity: 0; transition: opacity .2s;
+  }
+  .stage:hover .restart-tip { opacity: 1; }
+  .bubble {
+    position: absolute; top: 8%; right: 6%;
+    font-family: "Anton", Impact, sans-serif; font-size: 26px;
+    background: #fff; color: #000;
+    padding: 6px 14px; border: 3px solid #000; border-radius: 18px;
+    box-shadow: 4px 4px 0 var(--red);
+    transform: scale(0) rotate(8deg);
+    transition: transform .15s;
+    pointer-events: none;
+  }
+  .bubble.show { transform: scale(1) rotate(8deg); }
+  .eq {
+    position: absolute; left: 6%; bottom: 6%;
+    display: flex; gap: 4px; align-items: flex-end; height: 40px;
+    opacity: 0; transition: opacity .3s;
+  }
+  .stage.rapping .eq { opacity: 1; }
+  .eq span { width: 6px; background: var(--gold); height: 20%; }
+  .stage.rapping .eq span { animation: eq .45s ease-in-out infinite alternate; }
+  .eq span:nth-child(2) { animation-delay: -.1s !important; }
+  .eq span:nth-child(3) { animation-delay: -.25s !important; }
+  .eq span:nth-child(4) { animation-delay: -.35s !important; }
+  .eq span:nth-child(5) { animation-delay: -.05s !important; }
+  @keyframes eq { to { height: 100%; } }
+
+  .time {
+    font-family: "Anton", Impact, sans-serif;
+    font-size: clamp(56px, 18vw, 84px);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+    margin: 22px 0 6px;
+    text-shadow: 4px 4px 0 var(--red);
+  }
+  .time .cs { color: var(--gold); font-size: .6em; }
+  .status {
+    font-family: "Bebas Neue", sans-serif; font-size: 18px; letter-spacing: 4px;
+    color: #777; margin-bottom: 18px; height: 22px;
+  }
+  .status.on { color: var(--red); }
+
+  #micBtn {
+    position: relative;
+    width: 116px; height: 116px; border-radius: 50%;
+    border: 4px solid #fff; background: #1c1c1c;
+    cursor: pointer; padding: 0;
+    transition: transform .1s, background .2s, border-color .2s;
+    opacity: 0; transform: translateY(40px) scale(.4);
+  }
+  #micBtn.appear { animation: micIn .6s cubic-bezier(.2,1.4,.4,1) .25s forwards; }
+  @keyframes micIn { to { opacity: 1; transform: none; } }
+  #micBtn:active { transform: scale(.94); }
+  #micBtn svg { width: 64px; height: 64px; }
+  #micBtn.on { background: var(--red); border-color: var(--gold); }
+  #micBtn.on::after {
+    content: ""; position: absolute; inset: -12px; border-radius: 50%;
+    border: 3px solid var(--red);
+    animation: ring 1s ease-out infinite;
+  }
+  @keyframes ring { from { opacity: .9; transform: scale(.9); } to { opacity: 0; transform: scale(1.35); } }
+  .mic-label { margin-top: 12px; font-size: 13px; color: #888; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<!-- 오디오 파일: assets 폴더에 넣으면 자동으로 사용됩니다. 없으면 내장 비트로 대체됩니다. -->
+<audio id="bgmAudio" src="assets/bgm.mp3" loop preload="auto"></audio>
+<audio id="rapAudio" src="assets/rap.mp3" loop preload="auto"></audio>
+
+<button class="bgm-toggle" id="bgmToggle">♪ BGM OFF</button>
+
+<!-- ───────── 1페이지: 표지 ───────── -->
+<section class="page active" id="cover">
+  <div class="mag">
+    <img class="photo" data-src="assets/cover.jpg" alt="표지 사진">
+    <div class="tagline">THE MAGAZINE OF HIP-HOP MUSIC, CULTURE &amp; POLITICS</div>
+    <div class="masthead">THE VERSE</div>
+    <div class="issue">NO. 1<br>NOVEMBER 2026<br>$2.95</div>
+    <div class="lines">
+      <p>WEST COAST<br>LEGENDS<small>THE STORIES BEHIND THE BEATS</small></p>
+      <p>EVERY SECOND<br>COUNTS<small>TIMING IS EVERYTHING ON THE MIC</small></p>
+      <p>THE STOPWATCH<br>ISSUE<small>PRESS START TO DROP THE BEAT</small></p>
+    </div>
+    <div class="headline">
+      <div class="kicker">EXCLUSIVE</div>
+      <div class="big">ME AGAINST<br>THE CLOCK</div>
+    </div>
+    <div class="barcode"><div></div>0 74470 11264</div>
+    <button id="startBtn">START ▶</button>
+  </div>
+</section>
+
+<!-- ───────── 2페이지: 스탑워치 ───────── -->
+<section class="page" id="watch">
+  <div class="studio">
+    <button class="back" id="backBtn">◀ BACK TO COVER</button>
+    <div class="stage" id="stage" title="클릭하면 스탑워치를 재시작합니다">
+      <div class="rapper">
+        <img class="photo" data-src="assets/cover.jpg" alt="래퍼 사진">
+      </div>
+      <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="bubble" id="bubble">YEAH!</div>
+      <div class="restart-tip">사진을 클릭하면 재시작</div>
+    </div>
+    <div class="time" id="time">00:00<span class="cs">.00</span></div>
+    <div class="status" id="status">MIC CHECK</div>
+    <button id="micBtn" aria-label="마이크: 스탑워치 시작/정지">
+      <svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">
+        <rect x="22" y="6" width="20" height="32" rx="10" fill="#fff" fill-opacity=".15"/>
+        <path d="M22 18h8M22 24h8M22 30h8" stroke-width="2"/>
+        <path d="M14 30c0 10 8 18 18 18s18-8 18-18"/>
+        <path d="M32 48v9M22 58h20"/>
+      </svg>
+    </button>
+    <div class="mic-label">마이크를 눌러 시작 / 정지</div>
+  </div>
+</section>
+
+<script>
+/* ═════════ 사진: assets/cover.jpg가 없으면 직접 그린 일러스트로 대체 ═════════ */
+const FALLBACK_SVG = `
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="spot" cx="50%" cy="35%" r="65%">
+      <stop offset="0" stop-color="#f2c230"/><stop offset=".55" stop-color="#d71920"/><stop offset="1" stop-color="#3a0607"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#spot)"/>
+  <g fill="#000" opacity=".18">${Array.from({length:12},(_,i)=>`<rect x="${i*36}" y="0" width="14" height="400" transform="rotate(12 200 200)"/>`).join('')}</g>
+  <g fill="#0b0b0b">
+    <path d="M40 400 C50 300 110 265 200 262 C290 265 350 300 360 400 Z"/>
+    <rect x="172" y="215" width="56" height="60" rx="12"/>
+    <ellipse cx="200" cy="165" rx="62" ry="76"/>
+  </g>
+  <path d="M140 140 C150 92 250 92 262 140 L264 120 C255 80 145 80 136 120 Z" fill="#111"/>
+  <rect class="mouth" x="186" y="196" width="28" height="8" rx="4" fill="#d71920"/>
+  <g transform="rotate(-25 255 250)">
+    <rect x="240" y="225" width="22" height="90" rx="8" fill="#2a2a2a"/>
+    <circle cx="251" cy="222" r="20" fill="#9a9a9a" stroke="#000" stroke-width="3"/>
+  </g>
+  <ellipse cx="265" cy="300" rx="28" ry="22" fill="#0b0b0b"/>
+</svg>`;
+
+document.querySelectorAll('img.photo').forEach(img => {
+  img.addEventListener('error', () => {
+    const wrap = document.createElement('div');
+    wrap.className = 'photo';
+    wrap.style.cssText = 'position:absolute;inset:0';
+    if (img.closest('.rapper')) wrap.style.position = 'static';
+    wrap.innerHTML = FALLBACK_SVG;
+    img.replaceWith(wrap);
+  }, { once: true });
+  img.src = img.dataset.src;
+});
+
+/* ═════════ 내장 비트 (오디오 파일이 없을 때 사용하는 직접 만든 비트) ═════════ */
+const Synth = (() => {
+  let ctx, master, timer = null, step = 0, nextTime = 0, pat, noise;
+  const mtof = m => 440 * 2 ** ((m - 69) / 12);
+  const PATTERNS = {
+    cover: { bpm: 84, kick: [0, 7, 10], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14],
+             roots: [57, 53, 55, 52], chord: [[0,3,7,10],[0,4,7,11],[0,4,7,10],[0,3,7,10]], pad: true },
+    rap:   { bpm: 92, kick: [0, 3, 8, 10, 11], snare: [4, 12], hat: [...Array(16).keys()],
+             roots: [45, 45, 41, 43], pad: false },
+  };
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = noise.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  function env(g, t, peak, dur) {
+    g.gain.setValueAtTime(peak, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  }
+  function kick(t) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(140, t);
+    o.frequency.exponentialRampToValueAtTime(40, t + 0.25);
+    env(g, t, 1, 0.4);
+    o.connect(g).connect(master); o.start(t); o.stop(t + 0.4);
+  }
+  function hiss(t, freq, peak, dur) {
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = noise; f.type = 'highpass'; f.frequency.value = freq;
+    env(g, t, peak, dur);
+    s.connect(f).connect(g).connect(master); s.start(t); s.stop(t + dur);
+  }
+  function tone(t, freq, type, peak, dur) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(peak, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(master); o.start(t); o.stop(t + dur);
+  }
+  function play(s, t) {
+    const i = s % 16, bar = Math.floor(s / 16) % 4, sixteenth = 60 / pat.bpm / 4;
+    if (pat.kick.includes(i)) kick(t);
+    if (pat.snare.includes(i)) { hiss(t, 1200, 0.7, 0.22); tone(t, 190, 'triangle', 0.25, 0.1); }
+    if (pat.hat.includes(i)) hiss(t, 7500, i % 4 === 2 ? 0.25 : 0.12, 0.05);
+    if (pat.kick.includes(i)) tone(t, mtof(pat.roots[bar] - 12), 'sine', 0.5, sixteenth * 3);
+    if (pat.pad && i === 0) {
+      pat.chord[bar].forEach(iv => tone(t, mtof(pat.roots[bar] + iv), 'triangle', 0.06, sixteenth * 16));
+    }
+  }
+  function tick() {
+    while (nextTime < ctx.currentTime + 0.12) {
+      play(step, nextTime);
+      nextTime += 60 / pat.bpm / 4;
+      step = (step + 1) % 64;
+    }
+  }
+  return {
+    start(name) {
+      init(); ctx.resume();
+      this.stop();
+      pat = PATTERNS[name];
+      master = ctx.createGain(); master.gain.value = 0.55; master.connect(ctx.destination);
+      step = 0; nextTime = ctx.currentTime + 0.05;
+      timer = setInterval(tick, 25);
+    },
+    stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+      if (master) {
+        const m = master;
+        m.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
+        setTimeout(() => m.disconnect(), 300);
+        master = null;
+      }
+    },
+    resume() { if (ctx) ctx.resume(); },
+    get audible() { return !!timer && ctx && ctx.state === 'running'; },
+  };
+})();
+
+/* ═════════ 오디오 재생 도우미: 파일이 있으면 파일, 없으면 내장 비트 ═════════ */
+const bgmAudio = document.getElementById('bgmAudio');
+const rapAudio = document.getElementById('rapAudio');
+
+async function playTrack(audio, synthName) {
+  try {
+    await audio.play();
+    return 'file';
+  } catch (e) {
+    if (e.name === 'NotAllowedError') return 'blocked';   // 아직 사용자 클릭 전
+    Synth.start(synthName);                               // 파일이 없음 → 내장 비트
+    return Synth.audible ? 'synth' : 'blocked';
+  }
+}
+function stopTrack(audio, rewind = false) {
+  audio.pause();
+  if (rewind) audio.currentTime = 0;
+  Synth.stop();
+}
+
+/* ═════════ 1페이지: 표지 & BGM ═════════ */
+const cover = document.getElementById('cover');
+const watch = document.getElementById('watch');
+const bgmToggle = document.getElementById('bgmToggle');
+let bgmOn = false;
+let bgmWanted = true;   // 사용자가 끄지 않았다면 표지에서 자동 재생
+
+function setBgmUi() {
+  bgmToggle.textContent = bgmOn ? '♪ BGM ON' : '♪ BGM OFF';
+  bgmToggle.classList.toggle('on', bgmOn);
+}
+async function startBgm() {
+  if (bgmOn || !cover.classList.contains('active')) return;
+  const r = await playTrack(bgmAudio, 'cover');
+  bgmOn = r !== 'blocked';
+  setBgmUi();
+}
+function stopBgm() {
+  stopTrack(bgmAudio, true);
+  bgmOn = false;
+  setBgmUi();
+}
+
+bgmToggle.addEventListener('click', () => {
+  if (bgmOn) { bgmWanted = false; stopBgm(); }
+  else { bgmWanted = true; startBgm(); }
+});
+
+// 브라우저 자동재생 정책 때문에 첫 클릭/키 입력 때 BGM을 켭니다.
+function unlock(e) {
+  if (e.target.closest && (e.target.closest('#startBtn') || e.target.closest('#bgmToggle'))) return;
+  if (bgmWanted) startBgm();
+}
+document.addEventListener('pointerdown', unlock);
+document.addEventListener('keydown', unlock);
+startBgm();
+
+/* ═════════ 페이지 전환 ═════════ */
+const micBtn = document.getElementById('micBtn');
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  stopBgm();                         // 표지 BGM 정지
+  cover.classList.remove('active');
+  watch.classList.add('active');
+  bgmToggle.style.display = 'none';
+  micBtn.classList.remove('appear');
+  void micBtn.offsetWidth;
+  micBtn.classList.add('appear');    // 마이크 등장 애니메이션
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  pause();
+  watch.classList.remove('active');
+  cover.classList.add('active');
+  bgmToggle.style.display = '';
+  if (bgmWanted) startBgm();
+});
+
+/* ═════════ 2페이지: 스탑워치 ═════════ */
+const timeEl = document.getElementById('time');
+const statusEl = document.getElementById('status');
+const stage = document.getElementById('stage');
+const bubble = document.getElementById('bubble');
+const ADLIBS = ['YEAH!', 'UH!', 'WESTSIDE!', 'CHECK IT!', 'LET\'S GO!', 'WORD!', 'C\'MON!'];
+
+let running = false, startAt = 0, elapsed = 0, raf = null, adlibTimer = null;
+
+const pad = n => String(n).padStart(2, '0');
+function render(ms) {
+  const cs = Math.floor(ms / 10) % 100;
+  const s = Math.floor(ms / 1000) % 60;
+  const m = Math.floor(ms / 60000) % 60;
+  const h = Math.floor(ms / 3600000);
+  timeEl.innerHTML = (h ? h + ':' : '') + pad(m) + ':' + pad(s) + '<span class="cs">.' + pad(cs) + '</span>';
+}
+const current = () => running ? elapsed + performance.now() - startAt : elapsed;
+function loop() { render(current()); raf = requestAnimationFrame(loop); }
+
+function rapOn() {
+  stage.classList.add('rapping');
+  playTrack(rapAudio, 'rap');
+  let i = 0;
+  const pop = () => {
+    bubble.textContent = ADLIBS[i++ % ADLIBS.length];
+    bubble.classList.add('show');
+    setTimeout(() => bubble.classList.remove('show'), 600);
+  };
+  pop();
+  adlibTimer = setInterval(pop, 1304);  // 2박마다 애드립
+  animateMouth(true);
+}
+function rapOff(rewind = false) {
+  stage.classList.remove('rapping');
+  stopTrack(rapAudio, rewind);
+  clearInterval(adlibTimer);
+  bubble.classList.remove('show');
+  animateMouth(false);
+}
+
+// 일러스트일 때 입을 움직여 랩하는 모습 표현
+let mouthAnim = null;
+function animateMouth(on) {
+  const mouth = stage.querySelector('.mouth');
+  if (!mouth) return;
+  if (mouthAnim) mouthAnim.cancel();
+  mouthAnim = on ? mouth.animate(
+    [{ height: '8px', y: '196px' }, { height: '22px', y: '190px' }, { height: '6px', y: '197px' }, { height: '18px', y: '192px' }],
+    { duration: 652, iterations: Infinity }) : null;
+}
+
+function start() {
+  if (running) return;
+  running = true;
+  startAt = performance.now();
+  raf = requestAnimationFrame(loop);
+  micBtn.classList.add('on');
+  statusEl.textContent = '● ON AIR';
+  statusEl.classList.add('on');
+  rapOn();
+}
+function pause() {
+  if (!running) return;
+  elapsed = current();
+  running = false;
+  cancelAnimationFrame(raf);
+  render(elapsed);
+  micBtn.classList.remove('on');
+  statusEl.textContent = 'PAUSED';
+  statusEl.classList.remove('on');
+  rapOff();
+}
+
+micBtn.addEventListener('click', () => running ? pause() : start());
+
+// 사진 클릭 → 0부터 다시 시작
+stage.addEventListener('click', () => {
+  if (running) { running = false; cancelAnimationFrame(raf); rapOff(true); }
+  else rapAudio.currentTime = 0;
+  elapsed = 0;
+  render(0);
+  start();
+});
+
+document.addEventListener('keydown', e => {
+  if (!watch.classList.contains('active') || e.repeat) return;
+  if (e.code === 'Space') { e.preventDefault(); running ? pause() : start(); }
+});
+</script>
+</body>
+</html>
